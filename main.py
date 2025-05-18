@@ -12,14 +12,15 @@ from models import (
     GRU,
     RBFN,
     BertFreeze,
-    Bert
+    Bert,
+    Transformer
 )
-from data_utils import SLUDataset  # 如果SLUDataset也放在trainer.py里
+from data.data_utils import SLUDataset  
 
 def main():
     parser = argparse.ArgumentParser(description="SLU main entry")
     parser.add_argument('--config', type=str, default='configs/config.yaml', help='Path to config file')
-    parser.add_argument('--model_type', type=str, default='bert', choices=['bert','cnn','lstm', 'rbfn', 'gru'])
+    parser.add_argument('--model_type', type=str, default='transformer', choices=['bert','cnn','lstm', 'rbfn', 'gru', 'transformer'])
     args = parser.parse_args()
     
     # 读取配置
@@ -101,7 +102,6 @@ def main():
     elif args.model_type == 'bert':
         model = Bert(
             model_name=model_name,
-            vocab_size=vocab_size,
             num_intent_labels=len(intents_num),
             num_slot_labels=len(slots_num),
             max_intents=max_intents
@@ -112,6 +112,14 @@ def main():
         #     num_slot_labels=len(slots_num),
         #     max_intents=max_intents
         # )
+    elif args.model_type == 'transformer':
+        model = Transformer(
+            model_name=model_name,
+            vocab_size=vocab_size,
+            num_intent_labels=len(intents_num),
+            num_slot_labels=len(slots_num),
+            max_intents=max_intents
+        )
     else:
         model = GRU(
             vocab_size=vocab_size,

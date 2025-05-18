@@ -43,34 +43,33 @@ class BertFreeze(nn.Module):
         return intent_count_logits, intent_logits, slot_logits
     
 class Bert(nn.Module):
-    def __init__(self, model_name, vocab_size, num_intent_labels, num_slot_labels, max_intents):
+    def __init__(self, model_name, num_intent_labels, num_slot_labels, max_intents, nhead=4, d_model=128, num_layers=2):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, 512)
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=512, nhead=8, batch_first=True) # 这里batch_first=True是为了适配TransformerEncoder输入格式
-        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=6)  # 6层Transformer编码器
+        config = BertConfig(
+            vocab_size=30522,        # 词汇表大小，不会实用，就写个大点的数字
+            hidden_size=d_model,         # Transformer的隐层维度
+            num_hidden_layers=num_layers,     # Transformer Encoder层数
+            num_attention_heads=nhead,   # 多头注意力个数
+            intermediate_size=d_model*4,   # 前馈网络的中间层维度
+            hidden_dropout_prob=0.1,
+            attention_probs_dropout_prob=0.1,
+            # 其他参数可不改，默认即可
+        )
         
-        # 分类器
-        self.intent_count_fc = nn.Linear(512, max_intents)
-        self.intent_classifier = nn.Linear(512, num_intent_labels)
-        self.slot_classifier = nn.Linear(512, num_slot_labels)
+        self.encoder = BertModel(config)
+        self.intent_count_logits = nn.Linear(config.hidden_size, max_intents)
+        self.intent_classifier = nn.Linear(config.hidden_size, num_intent_labels)
+        self.slot_classifier = nn.Linear(config.hidden_size, num_slot_labels)
 
-    def forward(self, input_ids, attention_mask, token_type_ids=None):
-        # 1. 词嵌入
-        embedded = self.embedding(input_ids)  # [batch, seq_len, 512]
+    def forward(self, input_ids, attention_mask, token_type_ids):
+        outputs = self.encoder(input_ids, attention_mask, token_type_ids) 
+        # output.last_hidden_state: [batch_size, seq_len, hidden_size]
         
-        # 2. Transformer编码
-        key_padding_mask = (attention_mask == 0)  # 转换为bool类型
-        outputs = self.transformer_encoder(
-            src=embedded,
-            src_key_padding_mask=key_padding_mask
-        )  # [batch, seq_len, 512]
+        pooled_output = outputs.pooler_output  # 最后一层 CLS 输出，[batch_size, hidden_size]
+        sequence_output = outputs.last_hidden_state  # 最后一层每个token的隐藏状态，[batch_size, seq_len, hidden_size]
         
-        # 3. 意图分类（使用[CLS]）
-        cls_output = outputs[:, 0, :]  # 第一个token
-        intent_count_logits = self.intent_count_fc(cls_output)
-        intent_logits = self.intent_classifier(cls_output)
-        
-        # 4. 槽填充（全序列）
-        slot_logits = self.slot_classifier(outputs)  # [batch, seq_len, num_slots]
+        intent_count_logits = self.intent_count_logits(pooled_output)  # [batch_size, max_intents]
+        intent_logits = self.intent_classifier(pooled_output)  # [batch_size, num_intent_labels]
+        slot_logits = self.slot_classifier(sequence_output)  # [batch_size, seq_len, num_slots]
         
         return intent_count_logits, intent_logits, slot_logits

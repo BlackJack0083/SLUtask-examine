@@ -1,0 +1,7 @@
+{
+    "lr": 0.001,
+    "dim": 256,
+    "nhead": 8,
+    "num_layers": 2,
+    "model_name": "bert-base-cased"
+}

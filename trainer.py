@@ -17,7 +17,7 @@ def train_epoch(model, loader, optimizer, intent_count_loss_fn, intent_loss_fn, 
         intent_counts = batch['intent_counts'].to(device)
         slot_labels = batch['slot_labels'].to(device)
         
-        if model_type == "bert":
+        if model_type in ["bert", "transformer", "bert-freeze"]:
             attention_mask = batch['attention_mask'].to(device)
             token_type_ids = batch['token_type_ids'].to(device)
             ic_logits, it_logits, slot_logits = model(input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
@@ -61,7 +61,7 @@ def evaluate(model, loader, device, intent_count_loss_fn, intent_loss_fn, slot_l
             intent_labels = batch['intent_labels'].to(device)
             slot_labels = batch['slot_labels'].to(device)
 
-            if model_type == "bert":
+            if model_type in ["bert", "transformer", "bert-freeze"]:
                 attention_mask = batch['attention_mask'].to(device)
                 token_type_ids = batch['token_type_ids'].to(device)
                 ic_logits, it_logits, slot_logits = model(input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)

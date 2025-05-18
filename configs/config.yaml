@@ -1,7 +1,7 @@
-data_path: data/MixATIS_clean_processed.pth   # 指向预处理完的数据文件
+data_path: data/MixSNIPS_clean_processed.pth   # 指向预处理完的数据文件
 model_name: bert-base-cased         # BERT模型
 batch_size: 32
-epochs: 100
+epochs: 50
 lr: 1e-4
 vocab_size: 30522
 embed_dim: 64
