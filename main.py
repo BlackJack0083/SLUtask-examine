@@ -4,9 +4,8 @@ import torch
 import argparse
 import yaml
 from torch.utils.data import DataLoader
-
+import torch.nn as nn
 from trainer import train_epoch, evaluate
-# from single_trainer import train_epoch_intent, train_epoch_slot, evaluate
 from models import (
     CNN,
     LSTM,
@@ -20,7 +19,7 @@ from data_utils import SLUDataset  # 如果SLUDataset也放在trainer.py里
 def main():
     parser = argparse.ArgumentParser(description="SLU main entry")
     parser.add_argument('--config', type=str, default='configs/config.yaml', help='Path to config file')
-    parser.add_argument('--model_type', type=str, default='bert', choices=['bert','cnn','lstm', 'rbfn', 'gru', 'bert'])
+    parser.add_argument('--model_type', type=str, default='bert', choices=['bert','cnn','lstm', 'rbfn', 'gru'])
     args = parser.parse_args()
     
     # 读取配置
@@ -126,12 +125,9 @@ def main():
     model.to(device)
     
     # 定义损失函数
-    import torch.nn as nn
     intent_count_loss_fn = nn.CrossEntropyLoss()
     intent_loss_fn = nn.BCEWithLogitsLoss()
     slot_loss_fn = nn.CrossEntropyLoss(ignore_index=-100)
-    # intent_loss_fn = nn.BCELoss()
-    # slot_loss_fn = nn.NLLLoss(ignore_index=-100)
     
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(lr))
     

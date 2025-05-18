@@ -14,7 +14,7 @@ This project includes implementations for testing the following model architectu
 * Convolutional Neural Network (CNN)
 * Long Short-Term Memory (LSTM)
 * Gated Recurrent Unit (GRU)
-* Radial Basis Function Network (RBFN)
+* Result-based Bi-Feedback Network ([RBFN](https://arxiv.org/abs/1905.03969)) 
 * BERT-based models (specifically, using a frozen BERT encoder with custom downstream layers) 
 * Transformer(come soon)
 
