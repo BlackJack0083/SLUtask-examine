@@ -1,0 +1,8 @@
+# Ignore PyTorch model checkpoints
+*.pth
+
+# Ignore Python bytecode directories
+__pycache__/
+
+# Ignore the local BERT model directory
+bert-base-cased/
