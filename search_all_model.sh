@@ -3,7 +3,7 @@
 # This script runs hyperparameter search for each model type.
 
 # Define the list of model types to search
-MODEL_TYPES=("cnn" "lstm" "gru" "rbfn" "bertfreeze" "bert" "transformer")
+MODEL_TYPES=("cnn" "lstm" "gru" "rbfn" "bert-freeze" "bert" "transformer")
 # MODEL_TYPES=("cnn" )
 
 # Define the number of epochs to run for each search combination

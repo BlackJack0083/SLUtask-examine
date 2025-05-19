@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 class Transformer(nn.Module):
-    def __init__(self, model_name, vocab_size, num_intent_labels, num_slot_labels, max_intents, d_model=512, nhead=8, num_layers=6):
+    def __init__(self,  vocab_size, num_intent_labels, num_slot_labels, max_intents, d_model=512, nhead=8, num_layers=6):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, d_model)
         encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True)

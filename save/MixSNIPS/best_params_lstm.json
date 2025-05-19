@@ -1,0 +1,6 @@
+{
+    "lr": 0.001,
+    "embed_dim": 32,
+    "hidden_dim": 128,
+    "model_name": "bert-base-cased"
+}

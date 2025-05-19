@@ -16,19 +16,18 @@ from models import (
     LSTM,
     GRU,
     RBFN,
-    BertFreeze, # 对应 model_type='bertfreeze' (Frozen HF Bert)
+    BertFreeze, # 对应 model_type='bert-freeze' (Frozen HF Bert)
     Bert,       # 对应 model_type='bert' (Hugging Face BertModel based on config)
     Transformer # 对应 model_type='transformer' (PyTorch TransformerEncoder based)
 )
 
 # 导入训练和评估函数
-from trainer import train_epoch, evaluate # 确保 evaluate 函数已根据之前的建议修改为多标签评估
+from trainer import train_epoch, evaluate 
 
 # 导入数据集类
 from data.data_utils import SLUDataset
 
-
-def run_experiment(model_type, params, device, train_loader, val_loader, intents_num, slots_num, max_intents, vocab_size, epochs): # 添加 vocab_size 参数
+def run_experiment(model_type, params, device, train_loader, val_loader, intents_num, slots_num, max_intents, vocab_size, epochs): 
     """
     运行单次实验并在验证集上评估
     :param val_loader: 用于评估的验证集 DataLoader
@@ -43,7 +42,7 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
         'lstm': LSTM,
         'gru': GRU,
         'rbfn': RBFN,
-        'bertfreeze': BertFreeze,
+        'bert-freeze': BertFreeze,
         'bert': Bert,       # 使用 BertModel(config) 的类
         'transformer': Transformer # 使用 PyTorch TransformerEncoder 的类
     }
@@ -72,7 +71,7 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
             'num_slot_labels': len(slots_num),
             'max_intents': max_intents
         }
-    elif model_type == 'bertfreeze':
+    elif model_type == 'bert-freeze':
          model_init_params = {
             'model_name': params.get('model_name', 'bert-base-cased'),
             'num_intent_labels': len(intents_num),
@@ -83,8 +82,7 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
     elif model_type == 'bert': # 使用 BertModel(config) 的类
         model_init_params = {
             # Bert 类现在需要这些参数
-            # 注意参数名需要和你的 class Bert.__init__ 匹配
-            'model_name': params.get('model_name', 'bert-base-cased'), # 虽然是 config init，但也保留 model_name 参数
+            # 注意参数名需要和 class Bert.__init__ 匹配
             'd_model': params['dim'], # 'dim' -> d_model (hidden_size in BertConfig)
             'nhead': params['nhead'], # 'nhead' -> nhead (num_attention_heads in BertConfig)
             'num_layers': params['num_layers'], # 'num_layers' -> num_layers (num_hidden_layers in BertConfig)
@@ -97,8 +95,7 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
     elif model_type == 'transformer': # 使用 PyTorch TransformerEncoder 的类
          model_init_params = {
             # Transformer 类现在需要这些参数
-            # 注意参数名需要和你的 class Transformer.__init__ 匹配
-            'model_name': params.get('model_name', 'transformer'), # 标识符
+            # 注意参数名需要和 class Transformer.__init__ 匹配
             'vocab_size': vocab_size, # 这个模型需要 vocab_size 来初始化 nn.Embedding
             'd_model': params['dim'], # 'dim' -> d_model
             'nhead': params['nhead'], # 'nhead' -> nhead
@@ -107,7 +104,6 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
             'num_slot_labels': len(slots_num),
             'max_intents': max_intents
         }
-
 
     # 在实例化模型之前，检查 d_model / nhead 的整除性，尤其是对于 Bert 和 Transformer 类型
     if model_type in ['bert', 'transformer']:
@@ -131,34 +127,31 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
     for epoch in range(epochs):
         # print(f"Epoch {epoch+1}/{epochs}") # 不打印太多，搜索过程会很长
         # 训练时，Bert类需要 attention_mask 和 token_type_ids
-        if model_type in ['bertfreeze', 'bert', 'transformer']:
+        if model_type in ['bert-freeze', 'bert', 'transformer']:
              train_epoch(model, train_loader, optimizer, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, device, model_type)
         else:
              # 其他模型可能只需要 input_ids
              train_epoch(model, train_loader, optimizer, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, device, model_type)
 
-
     # 评估 (在验证集上)
     print("Evaluating on validation set...")
     # 评估时，Bert类需要 attention_mask 和 token_type_ids
-    if model_type in ['bertfreeze', 'bert', 'transformer']:
-         eval_results = evaluate(model, val_loader, device, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, slots_num, model_type)
+    if model_type in ['bert-freeze', 'bert', 'transformer']:
+        eval_results = evaluate(model, val_loader, device, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, slots_num, model_type)
     else:
          # 其他模型可能只需要 input_ids
-         eval_results = evaluate(model, val_loader, device, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, slots_num, model_type)
-
-
+        eval_results = evaluate(model, val_loader, device, intent_count_loss_fn, intent_loss_fn, slot_loss_fn, slots_num, model_type)
+        
     return model, eval_results
-
 
 def main():
     parser = argparse.ArgumentParser(description="SLU Hyperparameter Search")
     parser.add_argument('--config', type=str, default='configs/config.yaml', help='Path to base config file')
-    parser.add_argument('--model_type', type=str, required=True, choices=['cnn','lstm', 'gru', 'rbfn', 'bertfreeze', 'bert', 'transformer'],
+    parser.add_argument('--model_type', type=str, required=True, choices=['cnn','lstm', 'gru', 'rbfn', 'bert-freeze', 'bert', 'transformer'],
                         help='Model type to search hyperparameters for')
     parser.add_argument('--search_epochs', type=int, default=10, help='Number of epochs to train for each hyperparameter combination')
-    parser.add_argument('--save_dir', type=str, default='checkpoints/hyperparameter_search', help='Base directory to save best checkpoints')
-
+    parser.add_argument('--save_dir', type=str, default='checkpoints/hyperparameter_search/MisATIS', help='Base directory to save best checkpoints')
+    parser.add_argument('--data_path', type=str, help='Path to preprocessed data')
 
     args = parser.parse_args()
 
@@ -182,13 +175,17 @@ def main():
         # 'num_layers' 对应 Bert 类的 num_layers (num_hidden_layers in BertConfig) 和 Transformer 类的 num_layers
         'transformer_bert': {
             'dim': [256, 512],
-            'nhead': [8],
+            'nhead': [4, 8],
             'num_layers': [2, 6], # 添加 num_layers 到搜索空间
         },
     }
 
     # --- 加载数据 ---
-    data_path = cfg['data_path']
+    if args.data_path:
+        data_path = args.data_path
+    else:
+        data_path = cfg['data_path']
+        
     print("加载预处理后的数据:", data_path)
     data = torch.load(data_path)
     print("数据加载完成")
@@ -199,10 +196,9 @@ def main():
     intents_num = data['intents_num']
     slots_num = data['slots_num']
     # 确保 vocab_size 是实际使用的词汇表大小
-    # 如果你的数据处理脚本已经确定了词汇表大小并保存在 data 字典中，优先使用它
+    # 如果数据处理脚本已经确定了词汇表大小并保存在 data 字典中，优先使用它
     vocab_size = data.get('vocab_size', cfg.get('vocab_size', 30522))
     print(f"使用词汇表大小: {vocab_size}")
-
 
     # 拼接意图数量，找最大的意图数
     max_intents = max(train_encodings['intent_counts'].tolist() +
@@ -247,7 +243,7 @@ def main():
     elif model_type in ['bert', 'transformer']:
          current_param_grid_values = {**{'lr': param_grid['lr']}, **param_grid['transformer_bert']}
          param_names = ['lr', 'dim', 'nhead', 'num_layers'] # 添加 num_layers 到 param_names
-    elif model_type == 'bertfreeze':
+    elif model_type == 'bert-freeze':
         current_param_grid_values = {'lr': param_grid['lr']}
         param_names = ['lr']
     else:
@@ -269,8 +265,12 @@ def main():
         current_params = dict(zip(param_names, combo_values))
 
         # 添加其他固定参数
+        current_params['batch_size'] = batch_size
+        current_params['model_type'] = model_type
+        
         # BertFreeze 需要 model_name 参数
-        current_params['model_name'] = cfg.get('model_name', 'bert-base-cased')
+        if model_type == 'bert-freeze':
+            current_params['model_name'] = cfg.get('model_name', 'bert-base-cased')
         # vocab_size 传递给 run_experiment
 
         print(f"\n--- Testing {model_type} Combination {i+1}/{len(param_combinations)} ---")
@@ -352,7 +352,7 @@ def main():
 
 
         print("\nBest Parameters Found:")
-        print(json.dumps(best_params, indent=4)) # 这里可能仍然打印 numpy 类型
+        print(json.dumps(best_params, indent=4))
         print(f"\nBest Overall Accuracy on Validation Set: {best_overall_accuracy:.4f}")
         print(f"Best model checkpoint saved to: {final_best_ckpt_path}")
 

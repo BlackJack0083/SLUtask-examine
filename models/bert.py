@@ -43,7 +43,7 @@ class BertFreeze(nn.Module):
         return intent_count_logits, intent_logits, slot_logits
     
 class Bert(nn.Module):
-    def __init__(self, model_name, num_intent_labels, num_slot_labels, max_intents, nhead=4, d_model=128, num_layers=2):
+    def __init__(self, num_intent_labels, num_slot_labels, max_intents, nhead=4, d_model=128, num_layers=2):
         super().__init__()
         config = BertConfig(
             vocab_size=30522,        # 词汇表大小，不会实用，就写个大点的数字
