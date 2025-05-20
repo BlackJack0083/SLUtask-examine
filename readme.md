@@ -51,9 +51,9 @@ Base hyperparameters and training settings (like batch size, data path) can be a
     python main.py
 
     # Or train a specific model type
-    python main.py --model_type lstm
+    python main.py --model_type lstm --data_path data/MixATIS_clean_processed.pth
 
-    # Available types: cnn, lstm, gru, rbfn, bertfreeze, bert, transformer
+    # Available types: cnn, lstm, gru, rbfn, bert-freeze, bert, transformer
     ```
 
     The training process will output loss and evaluation metrics on the test set, and the trained model checkpoint will be saved to the `checkpoints/` directory.
@@ -75,5 +75,11 @@ Base hyperparameters and training settings (like batch size, data path) can be a
 
     You can also run the search for a specific model type directly:
     ```bash
-    python hyperparameter_search.py --model_type cnn --search_epochs 15 --save_dir checkpoints/hyperparameter_search
+    python hyperparameter_search.py --data_path data/MixATIS_clean_processed.pth --model_type cnn --search_epochs 15 --save_dir checkpoints/hyperparameter_search
     ```
+
+## Results
+
+The prediction results of the model obtained using the optimal hyperparameters are as follows:
+
+![image.png](https://hjk-image.oss-cn-shenzhen.aliyuncs.com/image/202505201009112.png)

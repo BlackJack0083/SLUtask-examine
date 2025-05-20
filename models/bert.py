@@ -43,10 +43,10 @@ class BertFreeze(nn.Module):
         return intent_count_logits, intent_logits, slot_logits
     
 class Bert(nn.Module):
-    def __init__(self, num_intent_labels, num_slot_labels, max_intents, nhead=4, d_model=128, num_layers=2):
+    def __init__(self, vocab_size, num_intent_labels, num_slot_labels, max_intents, nhead=4, d_model=128, num_layers=2):
         super().__init__()
         config = BertConfig(
-            vocab_size=30522,        # 词汇表大小，不会实用，就写个大点的数字
+            vocab_size=vocab_size,        # 词汇表大小，不会实用，就写个大点的数字
             hidden_size=d_model,         # Transformer的隐层维度
             num_hidden_layers=num_layers,     # Transformer Encoder层数
             num_attention_heads=nhead,   # 多头注意力个数

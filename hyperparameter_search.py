@@ -83,6 +83,7 @@ def run_experiment(model_type, params, device, train_loader, val_loader, intents
         model_init_params = {
             # Bert 类现在需要这些参数
             # 注意参数名需要和 class Bert.__init__ 匹配
+            'vocab_size': vocab_size,
             'd_model': params['dim'], # 'dim' -> d_model (hidden_size in BertConfig)
             'nhead': params['nhead'], # 'nhead' -> nhead (num_attention_heads in BertConfig)
             'num_layers': params['num_layers'], # 'num_layers' -> num_layers (num_hidden_layers in BertConfig)

@@ -87,7 +87,6 @@ def main():
 
     # 拼接意图数量，找最大的意图数 (用于意图数量分类器的输出维度)
     # 需要同时考虑训练集、验证集、测试集的最大意图数量，以防数据划分导致某个集合的最大值不是全局最大
-    # 假设 data 字典中包含了 train, val, test 的 encodings
     all_intent_counts = []
     if 'train' in data and 'intent_counts' in data['train']:
         all_intent_counts.extend(data['train']['intent_counts'].tolist())
@@ -195,13 +194,13 @@ def main():
             return # 退出程序
 
         model_init_params = {
+            'vocab_size': vocab_size,
             'd_model': d_model, # 使用确定后的 d_model (作为 hidden_size)
             'nhead': nhead, # 使用确定后的 nhead (作为 num_attention_heads)
             'num_layers': num_layers, # 使用确定后的 num_layers (作为 num_hidden_layers)
             'num_intent_labels': len(intents_num),
             'num_slot_labels': len(slots_num),
             'max_intents': max_intents,
-            # vocab_size 硬编码在 Bert 类中，如果需要外部控制，请修改 Bert 类
         }
         model = Bert(**model_init_params)
 
